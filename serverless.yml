@@ -1,0 +1,57 @@
+service: aws-lambda-node
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  iamRoleStatements: 
+  - Effect: Allow
+    Action:
+      - dynamodb:*
+    Resource:
+      - arn:aws:dynamodb:us-east-1:771174453519:table/productsTable
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - httpApi:
+          path: /
+          method: get
+  createProduct:
+    handler: src/addProduct.addProduct
+    events:
+      - httpApi:
+          path: /products
+          method: post
+  getProducts:
+    handler: src/getProducts.getProducts
+    events:
+      - httpApi:
+          path: /products
+          method: get
+  updateProduct:
+    handler: src/updateProduct.updateProduct
+    events:
+      - httpApi:
+          path: /products/{id}
+          method: put
+  deleteProduct:
+    handler: src/deleteProduct.deleteProduct
+    events:
+      - httpApi:
+          path: /products/{id}
+          method: delete
+resources: 
+  Resources:
+    productsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: productsTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
